@@ -16,23 +16,24 @@ import { useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import Link from "next/link";
+import { loginSchema } from "../schemas";
+import { useLogin } from "../api/useLogin";
 
-const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1, "required"),
-});
 
 export const SignInCard = () => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+
+  const { mutate } = useLogin()
+
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  const onSubmit = (values: z.infer<typeof loginSchema>) => {
+    mutate(values)
   };
 
   return (
