@@ -1,23 +1,64 @@
 import { Hono } from "hono"
 import { zValidator } from "@hono/zod-validator"
 import { loginSchema, registerSchema } from "../schemas";
+import { ID } from "node-appwrite";
+import { deleteCookie, setCookie } from "hono/cookie"
+import { createAdminClient } from "@/lib/appwrite";
+import { AUTH_COOKIE } from "../constants";
 
 const app = new Hono()
     .post(
         "/login", 
         zValidator('json', loginSchema),
-    async (c) => {
-        const { email, password } = c.req.valid("json");
-        console.log({ email, password });
-        return c.json({ success: 123});
-    })
+        async (c) => {
+            const { email, password } = c.req.valid("json");
+            const { account } = await createAdminClient();
+            try {
+                const session = await account.createEmailPasswordSession(email, password);
+          
+                setCookie(c, AUTH_COOKIE, session.secret, {
+                  path: "/",
+                  httpOnly: true,
+                  sameSite: "strict",
+                  maxAge: 60 * 60 * 24 * 30
+                });
+          
+                return c.json({ success: true });
+              } catch (error ) {
+                const err = error as Error;
+                return c.json({ success: false, message: 'Login failed', error: err.message }, 400);
+              }
+        })
     .post(
         "/register",
         zValidator('json', registerSchema),
         async (c) => {
             const { email, password, name } = c.req.valid("json");
-            console.log({ email, password, name });
-            return c.json({ success: 123});
+
+            const { account } = await createAdminClient();
+            await account.create(
+                ID.unique(), 
+                email, 
+                password, 
+                name
+            );
+
+            const session = await account.createEmailPasswordSession(email, password);
+
+            setCookie(c, AUTH_COOKIE, session.secret, {
+                path: "/",
+                httpOnly: true,
+                sameSite: "strict",
+                maxAge: 60 * 60 * 24 * 30
+            })
+
+            return c.json({ success: true });
+        }
+    )
+    .post("/logout", 
+        async (c) => {
+            deleteCookie(c, AUTH_COOKIE);
+            return c.json({ success: true });
         }
     )
 
