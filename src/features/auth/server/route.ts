@@ -23,11 +23,11 @@ const app = new Hono()
             const { account } = await createAdminClient();
             try {
                 const session = await account.createEmailPasswordSession(email, password);
-          
+                // console.log(session)
                 setCookie(c, AUTH_COOKIE, session.secret, {
                   path: "/",
                   httpOnly: true,
-                  sameSite: "strict",
+                  sameSite: "Strict",
                   maxAge: 60 * 60 * 24 * 30
                 });
           

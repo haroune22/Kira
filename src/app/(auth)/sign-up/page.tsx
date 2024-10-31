@@ -1,9 +1,13 @@
-"use client";
 
+import { getCurrent } from "@/features/auth/actions";
 import { SignUpCard } from "@/features/auth/components/SignUpCard";
+import { redirect } from "next/navigation";
 
 
-const SignUpPage = () => {
+const SignUpPage = async () => {
+  const user = await getCurrent()
+  // console.log(user)
+  if(user) redirect("/")
   return <SignUpCard />;
 };
 

@@ -50,10 +50,16 @@ export const sessionMiddleware = createMiddleware<AdditionalContext>(
         
         const user = await account.get()
         
-        c.set('account', account); // Attach account to the context
-        c.set('databases', databases); // Attach databases to the context
-        c.set('user', user); // Attach user to the context
-        c.set('storage', storage); // Attach storage to the context
-
-        await next(); 
-})
+        try {
+            const user = await account.get();
+            c.set('account', account);
+            c.set('databases', databases);
+            c.set('user', user);
+            c.set('storage', storage);
+            await next();
+        } catch (error) {
+            console.error("Failed to authenticate user:", error);
+            return c.json({ error: 'Unauthorized' }, 401);
+        }
+    }
+)
