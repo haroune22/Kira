@@ -42,24 +42,19 @@ export const sessionMiddleware = createMiddleware<AdditionalContext>(
         };
 
 
-        client.setSession(session); // Attach session to the client
+        client.setSession(session);
         
-        const account = new Account(client) as AccountType
+        const account = new Account(client)
         const databases = new Databases(client)
         const storage = new Storage(client)
         
         const user = await account.get()
         
-        try {
-            const user = await account.get();
-            c.set('account', account);
-            c.set('databases', databases);
-            c.set('user', user);
-            c.set('storage', storage);
-            await next();
-        } catch (error) {
-            console.error("Failed to authenticate user:", error);
-            return c.json({ error: 'Unauthorized' }, 401);
-        }
+        c.set('account', account);
+        c.set('databases', databases);
+        c.set('user', user);
+        c.set('storage', storage);
+        await next();
+
     }
 )
