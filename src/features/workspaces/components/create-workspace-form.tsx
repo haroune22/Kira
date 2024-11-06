@@ -20,6 +20,8 @@ import { useRef } from "react";
 import { ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 
 interface CreateWorkSpaceFormProps {
@@ -27,6 +29,7 @@ interface CreateWorkSpaceFormProps {
 }
 
 export const CreateWorkSpaceForm = ({ onCancel }: CreateWorkSpaceFormProps) => {
+  const router = useRouter();
   const { mutate, isPending } = useCreateWorkspace();
 
   const inputRef = useRef<HTMLInputElement>(null)
@@ -46,8 +49,10 @@ export const CreateWorkSpaceForm = ({ onCancel }: CreateWorkSpaceFormProps) => {
     }
 
     mutate({ form: finalValues}, {
-      onSuccess: () => {
+      onSuccess: ({ data }) => {
         form.reset();
+        // onCancel?.();
+        router.push(`/workspaces/${data.$id}`)
       }
     })
   };
@@ -62,11 +67,9 @@ export const CreateWorkSpaceForm = ({ onCancel }: CreateWorkSpaceFormProps) => {
   return (
     <Card className="w-full h-full border-none shadow-none">
       <CardHeader>
-        <CardTitle className="flex p-7">Create a new workspace</CardTitle>
+        <CardTitle className="flex p-3">Create a new workspace</CardTitle>
       </CardHeader>
-      <div className="px-7">
         <DottedSeparator />
-      </div>
       <CardContent className="py-7">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -146,6 +149,9 @@ export const CreateWorkSpaceForm = ({ onCancel }: CreateWorkSpaceFormProps) => {
                 variant="secondary"
                 onClick={onCancel}
                 disabled={isPending}
+                className={cn(
+                  !onCancel && "invisible"
+                )}
               >
                 Cancel
               </Button>
