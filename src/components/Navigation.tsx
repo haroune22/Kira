@@ -1,6 +1,10 @@
+"use client";
+
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { cn } from "@/lib/utils";
 import { SettingsIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { GoCheckCircle, GoCheckCircleFill, GoHome, GoHomeFill } from "react-icons/go"
 
 
@@ -13,34 +17,37 @@ const routes = [
     },
     {
         label: "My Tasks",
-        href: "",
+        href: "/tasks",
         icon: GoCheckCircle,
         activeIcon: GoCheckCircleFill
     },
     {
         label: "Settings",
-        href: "",
+        href: "/settings",
         icon: SettingsIcon,
         activeIcon: SettingsIcon,
     },
     {
         label: "Members",
-        href: "",
+        href: "/members",
         icon: UsersIcon,
         activeIcon: UsersIcon,
     },
 ];
 
 export const Navigation = () => {
+    const workspaceId = useWorkspaceId()
+    const pathname = usePathname()
+
   return (
     <ul className="flex flex-col">
         {routes.map((item) => {
-            
-            const isActive = true;
-            const Icon = isActive ? item.activeIcon : item.icon;
+            const fullHref = `/workspaces/${workspaceId}${item.href}`
+            const isActive = pathname === fullHref;
+            const Icon = isActive? item.activeIcon : item.icon;
 
             return (
-                <Link href={item.href} key={item.label}>
+                <Link href={fullHref} key={item.label}>
                     <div className={cn(
                         "flex items-center gap-2.5 p-2.5 rounded-md font-medium hover:text-primary transition text-neutral-500",
                         isActive && "bg-white shadow-sm hover:opacity-100 text-primary"
